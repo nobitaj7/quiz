@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nasha Mukt Yuva - Youth Participation Quiz</title>
+<style>
+:root{--bg:#071a12;--card:#0d2a1d;--green:#22c55e;--green2:#86efac;--text:#f4fff7;--muted:#b7cbbd;--danger:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Noto Sans Devanagari",sans-serif;background:radial-gradient(circle at top,#164e32 0,#071a12 48%,#04100a 100%);color:var(--text);min-height:100vh}
+.wrap{width:min(760px,94%);margin:auto;padding:22px 0 45px}
+header{text-align:center;padding:18px 8px 12px}
+.badge{display:inline-block;border:1px solid #4ade80;border-radius:999px;padding:7px 13px;color:#bbf7d0;font-size:13px;margin-bottom:10px}
+h1{font-size:clamp(25px,7vw,42px);margin:5px 0;color:#dcfce7}
+.school{font-size:clamp(14px,3.5vw,18px);color:#c7f9d4;line-height:1.5}
+.card{background:rgba(13,42,29,.92);border:1px solid rgba(134,239,172,.2);border-radius:22px;padding:20px;margin-top:16px;box-shadow:0 15px 45px #0005}
+input{width:100%;padding:14px 15px;margin:7px 0;border-radius:12px;border:1px solid #47765b;background:#071a12;color:white;font-size:16px;outline:none}
+button{border:0;border-radius:13px;padding:14px 18px;font-size:16px;font-weight:700;cursor:pointer}
+.primary{background:var(--green);color:#05220f;width:100%;margin-top:10px}
+.primary:hover{background:#4ade80}
+.hidden{display:none}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
+.progress{height:8px;background:#183d2a;border-radius:99px;overflow:hidden;margin:8px 0 18px}
+.bar{height:100%;background:linear-gradient(90deg,#22c55e,#86efac);width:10%;transition:.3s}
+.qno{color:#86efac;font-weight:700;font-size:14px}
+.timer{font-variant-numeric:tabular-nums;background:#082317;border:1px solid #28583d;padding:7px 11px;border-radius:10px;color:#bbf7d0}
+.question{font-size:21px;line-height:1.55;margin:8px 0 17px;font-weight:700}
+.option{display:block;width:100%;text-align:left;background:#102f21;color:#effff3;border:1px solid #315b45;margin:10px 0;padding:14px;border-radius:13px;line-height:1.45}
+.option:hover{border-color:#86efac;background:#153a28}
+.option.selected{border-color:#4ade80;background:#1b5133;box-shadow:0 0 0 2px #22c55e44}
+.nav{display:flex;gap:10px;margin-top:15px}.nav button{flex:1}
+.secondary{background:#183d2a;color:#d9ffe5}
+.result{text-align:center}.score{font-size:64px;font-weight:800;color:#86efac;margin:5px}
+.message{font-size:18px;line-height:1.6;color:#d7fbe1}
+.note{font-size:12px;color:#91ad9b;line-height:1.5;margin-top:15px}
+footer{text-align:center;color:#7fa68d;font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="badge">🌿 नशा मुक्त भारत • युवा भागीदारी</div>
+  <h1>Nasha Mukt Yuva</h1>
+  <div class="school">PM SHRI Government Senior Secondary School, Gangwa</div>
+</header>
+
+<section id="start" class="card">
+  <h2>युवा सहभागिता क्विज़</h2>
+  <p class="school">नशा-मुक्त समाज बनाने में युवाओं की भूमिका पर आधारित 10 प्रश्न।</p>
+  <label>आपका नाम</label>
+  <input id="name" placeholder="अपना नाम लिखें" maxlength="50">
+  <label>कक्षा <span style="color:#91ad9b;font-weight:400;">(वैकल्पिक)</span></label>
+  <input id="className" placeholder="जैसे 11वीं / 12वीं (अगर चाहें)" maxlength="20">
+  <button class="primary" onclick="startQuiz()">क्विज़ शुरू करें →</button>
+  <div class="note">कृपया हर प्रश्न में सबसे उपयुक्त उत्तर चुनें। क्विज़ पूरा होने पर आपका स्कोर दिखाई देगा।</div>
+</section>
+
+<section id="quiz" class="card hidden">
+  <div class="top"><span class="qno" id="qno"></span><span class="timer" id="timer">05:00</span></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="question" id="question"></div>
+  <div id="options"></div>
+  <div class="nav">
+    <button class="secondary" id="prev" onclick="prevQ()">← पिछला</button>
+    <button class="primary" id="next" onclick="nextQ()">अगला →</button>
+  </div>
+</section>
+
+<section id="result" class="card result hidden">
+  <div class="badge">क्विज़ पूरा हुआ</div>
+  <h2 id="resultName"></h2>
+  <div class="score" id="score"></div>
+  <div class="message" id="message"></div>
+  <button class="primary" onclick="location.reload()">फिर से प्रयास करें</button>
+  <div class="note">“नशे को ना, जीवन को हाँ — युवा बदलाव की ताकत हैं।”</div>
+</section>
+
+<footer>PM SHRI Government Senior Secondary School, Gangwa • Nasha Mukt Yuva</footer>
+</div>
+
+<script>
+const questions = [
+ {q:"नशा-मुक्त समाज बनाने में युवाओं की सबसे प्रभावी भूमिका क्या हो सकती है?",o:["जागरूकता फैलाना और सकारात्मक उदाहरण बनना","नशे को सामान्य मानना","नशे का प्रचार करना","समस्या को नजरअंदाज करना"],a:0},
+ {q:"Peer Pressure (साथियों का दबाव) क्या है और इससे बचने का सही तरीका क्या है?",o:["दोस्तों के दबाव में आकर गलत काम करना","अपने निर्णय पर कायम रहना और जरूरत पड़ने पर मदद लेना","हर बात में दोस्तों की नकल करना","समस्या छिपाना"],a:1},
+ {q:"अगर कोई दोस्त आपको नशा करने के लिए मजबूर करे, तो क्या करना चाहिए?",o:["उसके दबाव में आ जाना","नशा करके देखना","स्पष्ट रूप से मना करना और किसी भरोसेमंद बड़े/शिक्षक से मदद लेना","दोस्त से समस्या छिपाना"],a:2},
+ {q:"नशे की लत से बाहर आने में इच्छाशक्ति के साथ किसकी मदद उपयोगी हो सकती है?",o:["केवल सोशल मीडिया","परिवार, डॉक्टर या प्रशिक्षित काउंसलर की सहायता","किसी अनजान व्यक्ति की सलाह","समस्या को अनदेखा करना"],a:1},
+ {q:"परिवार और दोस्तों की नशा-मुक्ति में क्या भूमिका होनी चाहिए?",o:["सहयोग, समझ और उचित मदद उपलब्ध कराना","व्यक्ति को अपमानित करना","समस्या छिपाना","उसे अकेला छोड़ देना"],a:0},
+ {q:"विद्यालय और खेल युवाओं को नशे से दूर रखने में कैसे मदद कर सकते हैं?",o:["स्वस्थ गतिविधियों, खेल और जागरूकता के अवसर देकर","विद्यार्थियों को अकेला रखकर","नशे को मजाक बनाकर","खेल बंद करके"],a:0},
+ {q:"सोशल मीडिया का सकारात्मक उपयोग नशा-मुक्ति के लिए कैसे किया जा सकता है?",o:["नशे का प्रचार करके","भ्रामक जानकारी फैलाकर","जागरूकता और विश्वसनीय जानकारी साझा करके","नशे को चुनौती की तरह दिखाकर"],a:2},
+ {q:"नशे की लत से जूझ रहे व्यक्ति के प्रति समाज का सही रवैया क्या होना चाहिए?",o:["भेदभाव और अपमान","सहानुभूति, समर्थन और उपचार के लिए प्रोत्साहन","उसे समाज से अलग करना","उसकी समस्या का मजाक उड़ाना"],a:1},
+ {q:"एक विद्यार्थी अपने मित्र को नशे से बचाने के लिए क्या कर सकता है?",o:["उसे सकारात्मक गतिविधियों में शामिल करे और जरूरत पर भरोसेमंद वयस्क से मदद ले","उससे नशे के बारे में छिपकर बात करे और कुछ न करे","उसे नशा आजमाने की सलाह दे","समस्या को मजाक में टाल दे"],a:0},
+ {q:"अपने गाँव और समाज को नशा-मुक्त बनाने में युवा क्या कर सकते हैं?",o:["जागरूकता अभियान, सकारात्मक गतिविधियाँ और सहयोग को बढ़ावा देना","नशे को सामान्य बताना","समस्या की शिकायत न करना","नशे से जुड़े प्रचार को बढ़ावा देना"],a:0}
+];
+
+let current=0, answers=Array(questions.length).fill(null), seconds=300, interval;
+
+function startQuiz(){
+  const name=document.getElementById('name').value.trim();
+  const cls=document.getElementById('className').value.trim();
+  if(!name){alert("कृपया अपना नाम लिखें।");return;}
+  localStorage.setItem("quizName",name); localStorage.setItem("quizClass",cls);
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  render();
+  interval=setInterval(()=>{seconds--;updateTimer();if(seconds<=0)finish();},1000);
+}
+function updateTimer(){let m=Math.floor(seconds/60),s=seconds%60;document.getElementById('timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+function render(){
+  const x=questions[current];
+  document.getElementById('qno').textContent=`प्रश्न ${current+1} / ${questions.length}`;
+  document.getElementById('bar').style.width=((current+1)/questions.length*100)+"%";
+  document.getElementById('question').textContent=x.q;
+  const box=document.getElementById('options'); box.innerHTML="";
+  x.o.forEach((opt,i)=>{const b=document.createElement('button');b.className='option'+(answers[current]===i?' selected':'');b.textContent=String.fromCharCode(65+i)+". "+opt;b.onclick=()=>{answers[current]=i;render();};box.appendChild(b);});
+  document.getElementById('prev').disabled=current===0;
+  document.getElementById('next').textContent=current===questions.length-1?"क्विज़ जमा करें ✓":"अगला →";
+}
+function prevQ(){if(current>0){current--;render();}}
+function nextQ(){if(answers[current]===null){alert("कृपया एक उत्तर चुनें।");return;}if(current<questions.length-1){current++;render();}else finish();}
+function finish(){
+ clearInterval(interval);
+ let score=answers.reduce((s,a,i)=>s+(a===questions[i].a?1:0),0);
+ document.getElementById('quiz').classList.add('hidden');document.getElementById('result').classList.remove('hidden');
+ document.getElementById('resultName').textContent=`शाबाश, ${localStorage.getItem("quizName")}!`;
+ document.getElementById('score').textContent=`${score} / ${questions.length}`;
+ document.getElementById('message').textContent=score>=8?"आपकी नशा-मुक्त समाज के प्रति समझ बहुत अच्छी है। युवाओं की सकारात्मक भागीदारी बदलाव ला सकती है।":score>=5?"अच्छी कोशिश! सही जानकारी और जागरूकता से आप और बेहतर कर सकते हैं।":"कोई बात नहीं! नशा-मुक्ति के बारे में जागरूक होना पहला कदम है।";
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
